@@ -1,0 +1,183 @@
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+
+const prisma = new PrismaClient();
+
+async function main() {
+  const hashedPassword = await bcrypt.hash("admin123", 10);
+  
+  await prisma.admin.upsert({
+    where: { email: "admin@nanoflows.com" },
+    update: {},
+    create: {
+      name: "Admin",
+      email: "admin@nanoflows.com",
+      password: hashedPassword,
+    },
+  });
+
+  await prisma.heroSlide.deleteMany();
+  await prisma.heroSlide.createMany({
+    data: [
+      {
+        heading: "Empowering Businesses with Generative AI & Intelligent Automation",
+        subHeading: "From ideas to intelligent systems — we design AI-driven software, automation, and agents that run your business smarter, faster, and at scale.",
+        tags: ["AI Automation", "AI Agents", "Intelligent Software", "Business Intelligence"],
+        backgroundImageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1920&h=1080&fit=crop",
+        isActive: true,
+        displayOrder: 1,
+      },
+      {
+        heading: "Build Autonomous AI Agents for Your Business",
+        subHeading: "Custom AI agents that work 24/7, handling sales, support, and operations with human-like intelligence.",
+        tags: ["Chatbots", "Sales Agents", "Support Bots", "Workflow Automation"],
+        backgroundImageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1920&h=1080&fit=crop",
+        isActive: true,
+        displayOrder: 2,
+      },
+      {
+        heading: "Transform Data into Actionable Intelligence",
+        subHeading: "Leverage predictive analytics, real-time dashboards, and AI-powered insights to drive strategic decisions.",
+        tags: ["Data Analytics", "Machine Learning", "Predictive AI", "Business Intelligence"],
+        backgroundImageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop",
+        isActive: true,
+        displayOrder: 3,
+      },
+    ],
+  });
+
+  await prisma.about.deleteMany();
+  await prisma.about.create({
+    data: {
+      mission: "To democratize AI technology and empower businesses of all sizes with intelligent automation solutions that drive growth and efficiency.",
+      vision: "A world where every business leverages AI to operate smarter, faster, and more efficiently — unlocking human potential for creativity and innovation.",
+      teamIntro: "Our team of AI experts, engineers, and strategists are passionate about transforming businesses through cutting-edge technology.",
+      expertise: ["Generative AI", "Machine Learning", "Process Automation", "Custom Software Development"],
+      coreValues: ["Innovation First", "Client Success", "Continuous Learning", "Ethical AI"],
+    },
+  });
+
+  await prisma.teamMember.deleteMany();
+  await prisma.teamMember.createMany({
+    data: [
+      {
+        name: "Alex Chen",
+        role: "CEO & AI Strategist",
+        bio: "15+ years leading AI initiatives at Fortune 500 companies. Expert in enterprise AI transformation.",
+        expertise: ["AI Strategy", "Enterprise Solutions", "Leadership"],
+        avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
+        isActive: true,
+        displayOrder: 1,
+      },
+      {
+        name: "Sarah Johnson",
+        role: "CTO & ML Engineer",
+        bio: "Former Google ML researcher. Specializes in building scalable AI systems and LLM applications.",
+        expertise: ["Machine Learning", "LLMs", "System Architecture"],
+        avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face",
+        isActive: true,
+        displayOrder: 2,
+      },
+      {
+        name: "Michael Park",
+        role: "Head of Product",
+        bio: "Product leader with expertise in AI-powered SaaS. Focused on delivering exceptional user experiences.",
+        expertise: ["Product Strategy", "UX Design", "SaaS"],
+        avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face",
+        isActive: true,
+        displayOrder: 3,
+      },
+    ],
+  });
+
+  await prisma.blogPost.deleteMany();
+  await prisma.blogPost.createMany({
+    data: [
+      {
+        title: "How AI Automation Saved a Logistics Company $2M Annually",
+        slug: "ai-automation-logistics-case-study",
+        excerpt: "Discover how we implemented intelligent workflow automation that transformed operations and cut costs dramatically.",
+        content: "Full case study content here...",
+        imageUrl: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&h=400&fit=crop",
+        isPublished: true,
+        publishedAt: new Date(),
+      },
+      {
+        title: "Building Custom LLM Solutions for Enterprise",
+        slug: "custom-llm-enterprise-guide",
+        excerpt: "A comprehensive guide to deploying tailored large language models that understand your business context.",
+        content: "Full guide content here...",
+        imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop",
+        isPublished: true,
+        publishedAt: new Date(),
+      },
+      {
+        title: "AI Chatbots: From Customer Support to Sales Conversion",
+        slug: "ai-chatbots-support-sales",
+        excerpt: "Learn how AI-powered chatbots are revolutionizing customer engagement and driving revenue growth.",
+        content: "Full article content here...",
+        imageUrl: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&h=400&fit=crop",
+        isPublished: true,
+        publishedAt: new Date(),
+      },
+    ],
+  });
+
+  await prisma.jobPosting.deleteMany();
+  await prisma.jobPosting.createMany({
+    data: [
+      {
+        title: "AI/ML Engineer",
+        department: "Engineering",
+        type: "Full-time",
+        location: "Remote",
+        description: "Design and implement machine learning models for our autonomous AI platforms. Work on cutting-edge NLP, computer vision, and predictive analytics systems.",
+        requirements: ["3+ years ML/AI experience", "Python proficiency", "Experience with TensorFlow/PyTorch", "Strong math background"],
+        isActive: true,
+        displayOrder: 1,
+      },
+      {
+        title: "Full Stack Developer",
+        department: "Engineering",
+        type: "Full-time",
+        location: "Remote",
+        description: "Build and maintain our web applications using React, Node.js, and cloud infrastructure. Create intuitive interfaces for complex AI systems.",
+        requirements: ["3+ years full-stack experience", "React/Next.js expertise", "Node.js/TypeScript", "Cloud experience (AWS/GCP)"],
+        isActive: true,
+        displayOrder: 2,
+      },
+      {
+        title: "Product Designer",
+        department: "Design",
+        type: "Full-time",
+        location: "Remote",
+        description: "Design beautiful and functional user experiences for our AI products. Work closely with engineering to bring designs to life.",
+        requirements: ["4+ years product design experience", "Figma proficiency", "Strong portfolio", "Experience with SaaS products"],
+        isActive: true,
+        displayOrder: 3,
+      },
+      {
+        title: "AI Solutions Architect",
+        department: "Engineering",
+        type: "Full-time",
+        location: "Remote",
+        description: "Architect end-to-end AI solutions for enterprise clients. Define technical roadmaps and lead implementation of agentic AI systems.",
+        requirements: ["5+ years architecture experience", "Enterprise AI deployment", "Strong communication skills", "Leadership experience"],
+        isActive: true,
+        displayOrder: 4,
+      },
+    ],
+  });
+
+  console.log("Database seeded successfully!");
+  console.log("Admin credentials: admin@nanoflows.com / admin123");
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
