@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
+import { Request, Response } from "express";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "";
 if (!JWT_SECRET) {
@@ -27,11 +26,23 @@ export function signAdminToken(adminId: number) {
   return jwt.sign({ adminId }, JWT_SECRET, { expiresIn: "7d" });
 }
 
-export function getAdminFromRequest(req: NextRequest) {
-  const token = req.cookies.get(ADMIN_TOKEN_NAME)?.value;
-  if (!token) return null;
+export function getAdminFromRequest(req: Request | { headers?: Record<string, string> } ) {
+  // support Express `req` or a simple object with `headers` for cookie string
+  const cookieHeader = (req as Request).headers?.cookie || (req as any).headers?.cookie || "";
+  const cookies = cookieHeader.split(";").map((c: string) => c.trim());
+  const tokenPair = cookies.find((c: string) => c.startsWith(ADMIN_TOKEN_NAME + "="));
+  const token = tokenPair ? tokenPair.split("=").slice(1).join("=") : null;
+  // fallback: support `Authorization: Bearer <token>` header
+  let finalToken: string | null = token;
+  if (!finalToken) {
+    const authHeader = (req as Request).headers?.authorization || (req as any).headers?.authorization || "";
+    if (authHeader && typeof authHeader === "string" && authHeader.toLowerCase().startsWith("bearer ")) {
+      finalToken = authHeader.slice(7).trim() || null;
+    }
+  }
+  if (!finalToken) return null;
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as JwtPayload & { adminId?: number };
+    const payload = jwt.verify(finalToken, JWT_SECRET) as JwtPayload & { adminId?: number };
     if (payload && typeof payload === "object" && typeof payload.adminId === "number") {
       return payload.adminId;
     }
@@ -41,27 +52,38 @@ export function getAdminFromRequest(req: NextRequest) {
   }
 }
 
-export async function setAdminCookie(token: string) {
-  const cookieStore = await cookies();
-  cookieStore.set(ADMIN_TOKEN_NAME, token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: ADMIN_COOKIE_SAMESITE,
-    domain: ADMIN_COOKIE_DOMAIN,
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
+export function setAdminCookie(token: string, res?: Response) {
+  const secureFlag = process.env.NODE_ENV === "production";
+  const sameSite = secureFlag ? "none" : ADMIN_COOKIE_SAMESITE;
+  const cookieValue = `${ADMIN_TOKEN_NAME}=${token}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=${sameSite};${ADMIN_COOKIE_DOMAIN ? ` Domain=${ADMIN_COOKIE_DOMAIN};` : ""} HttpOnly`;
+  if (res && typeof res.cookie === "function") {
+    res.cookie(ADMIN_TOKEN_NAME, token, {
+      httpOnly: true,
+      secure: secureFlag,
+      sameSite: sameSite as "lax" | "strict" | "none",
+      domain: ADMIN_COOKIE_DOMAIN,
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7 * 1000,
+    });
+    return;
+  }
+  return cookieValue;
 }
 
-export async function clearAdminCookie() {
-  const cookieStore = await cookies();
-  cookieStore.set(ADMIN_TOKEN_NAME, "", {
-    httpOnly: true,
-    secure: true,
-    sameSite: ADMIN_COOKIE_SAMESITE,
-    domain: ADMIN_COOKIE_DOMAIN,
-    path: "/",
-    maxAge: 0,
-  });
+export function clearAdminCookie(res?: Response) {
+  const secureFlag = process.env.NODE_ENV === "production";
+  const sameSite = secureFlag ? "none" : ADMIN_COOKIE_SAMESITE;
+  const cookieValue = `${ADMIN_TOKEN_NAME}=; Path=/; Max-Age=0; SameSite=${sameSite};${ADMIN_COOKIE_DOMAIN ? ` Domain=${ADMIN_COOKIE_DOMAIN};` : ""} HttpOnly`;
+  if (res && typeof res.clearCookie === "function") {
+    res.clearCookie(ADMIN_TOKEN_NAME, {
+      httpOnly: true,
+      secure: secureFlag,
+      sameSite: sameSite as "lax" | "strict" | "none",
+      domain: ADMIN_COOKIE_DOMAIN,
+      path: "/",
+    });
+    return;
+  }
+  return cookieValue;
 }
 

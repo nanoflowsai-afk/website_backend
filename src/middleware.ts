@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { Request, Response, NextFunction } from "express";
 
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || "")
   .split(",")
@@ -20,40 +20,26 @@ function isOriginAllowed(origin: string | null) {
   });
 }
 
-function withCorsHeaders(response: NextResponse, origin: string | null) {
+export function expressCorsMiddleware(req: Request, res: Response, next: NextFunction) {
+  const origin = req.headers.origin ?? null;
   const allowOrigin =
     !origin && !allowedOrigins.length
       ? "*"
-      : isOriginAllowed(origin)
-        ? origin ?? allowedOrigins[0]
-        : allowedOrigins[0];
+      : isOriginAllowed(origin as string)
+      ? (origin as string) ?? allowedOrigins[0]
+      : allowedOrigins[0];
 
-  response.headers.set("Access-Control-Allow-Origin", allowOrigin || "*");
-  response.headers.set("Access-Control-Allow-Methods", allowedMethods);
-  response.headers.set("Access-Control-Allow-Headers", allowedHeaders);
-  response.headers.set("Access-Control-Allow-Credentials", "true");
-
-  return response;
-}
-
-export function middleware(req: NextRequest) {
-  if (!req.nextUrl.pathname.startsWith("/api/")) {
-    return NextResponse.next();
-  }
-
-  const origin = req.headers.get("origin");
+  res.header("Access-Control-Allow-Origin", allowOrigin || "*");
+  res.header("Access-Control-Allow-Methods", allowedMethods);
+  res.header("Access-Control-Allow-Headers", allowedHeaders);
+  res.header("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
-    // Use a plain 204 response for preflight, then add CORS headers
-    const preflight = new NextResponse(null, { status: 204 });
-    return withCorsHeaders(preflight, origin);
+    return res.sendStatus(204);
   }
 
-  const response = NextResponse.next();
-  return withCorsHeaders(response, origin);
+  next();
 }
 
-export const config = {
-  matcher: "/api/:path*",
-};
+export default expressCorsMiddleware;
 
