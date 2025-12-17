@@ -13,6 +13,7 @@ import authRouter from "./routes/auth.js";
 import adminRouter from "./routes/admin/index.js";
 import uploadsRouter from "./routes/uploads.js";
 import careersRouter from "./routes/careers.js";
+import applyRouter from "./routes/apply.js";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/uploads", uploadsRouter);
 app.use("/api/careers", careersRouter);
+app.use("/api/apply", applyRouter);
 
 // Serve uploaded files from /uploads/*
 app.use(
