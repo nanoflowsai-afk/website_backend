@@ -18,7 +18,27 @@ import applyRouter from "./routes/apply.js";
 const app = express();
 
 app.use(morgan("dev"));
-app.use(cors({ origin: true, credentials: true }));
+
+// CORS: explicitly allow the deployed frontend and localhost dev to call this API
+const allowedOrigins = [
+  process.env.FRONTEND_ORIGIN || "",
+  "http://localhost:5000",
+  "http://localhost:3000",
+  "https://website-frontend-ruddy.vercel.app",
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true); // server-to-server or curl
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
+    },
+    credentials: true,
+  }),
+);
+// Handle preflight for all routes
+app.options("*", cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 
