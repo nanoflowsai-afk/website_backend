@@ -1,33 +1,65 @@
 import { Router } from "express";
+import type { Request } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs/promises";
 import crypto from "crypto";
 
-const upload = multer();
+type UploadFile = {
+  mimetype: string;
+  originalname?: string;
+  buffer?: Buffer;
+};
+
+const upload = multer({
+  storage: multer.memoryStorage(), // ensure file.buffer is available
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (_req: Request, file: UploadFile, cb: (error: Error | null, acceptFile: boolean) => void) => {
+    const allowedMimes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file type. Only images are allowed."), false);
+    }
+  },
+});
 const router = Router();
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
-router.post("/", upload.single("file"), async (req, res) => {
-  try {
-    const file = req.file;
-    if (!file) return res.status(400).json({ error: "File is required" });
+// Ensure uploads directory exists on startup
+fs.mkdir(UPLOAD_DIR, { recursive: true }).catch((err) => {
+  console.error("Failed to create uploads directory:", err);
+});
 
-    const ext = (file.originalname?.split(".").pop() || "bin").toLowerCase();
-    const name = crypto.randomBytes(8).toString("hex");
-    const filename = `${name}.${ext}`;
+router.post("/", (req, res) => {
+  // Wrap multer to surface validation errors as JSON instead of default HTML
+  upload.single("file")(req, res, async (err: any) => {
+    if (err) {
+      console.error("Upload validation error:", err);
+      return res.status(400).json({ error: err.message || "Invalid upload" });
+    }
 
-    await fs.mkdir(UPLOAD_DIR, { recursive: true });
-    const filePath = path.join(UPLOAD_DIR, filename);
-    await fs.writeFile(filePath, file.buffer!);
+    try {
+      const file = req.file;
+      if (!file) return res.status(400).json({ error: "File is required" });
+      if (!file.buffer) return res.status(400).json({ error: "Uploaded file buffer missing" });
 
-    const url = `/uploads/${filename}`;
-    res.json({ url });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Upload failed" });
-  }
+      const ext = (file.originalname?.split(".").pop() || "bin").toLowerCase();
+      const name = crypto.randomBytes(8).toString("hex");
+      const filename = `${name}.${ext}`;
+
+      await fs.mkdir(UPLOAD_DIR, { recursive: true });
+      const filePath = path.join(UPLOAD_DIR, filename);
+      await fs.writeFile(filePath, file.buffer);
+
+      const url = `/uploads/${filename}`;
+      res.json({ url });
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      res.status(500).json({ error: "Upload failed" });
+    }
+  });
 });
 
 export default router;
