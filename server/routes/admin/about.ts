@@ -34,4 +34,39 @@ router.post("/", async (req, res) => {
   res.json({ about });
 });
 
+// Support PUT for clients that expect an idempotent update endpoint
+router.put("/", async (req, res) => {
+  const adminId = requireAdmin(req);
+  if (!adminId) return res.status(401).json({ error: "Unauthorized" });
+
+  const parsed = aboutSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid payload" });
+  }
+
+  const existing = await prisma.about.findFirst();
+  const about = existing
+    ? await prisma.about.update({
+        where: { id: existing.id },
+        data: {
+          mission: parsed.data.mission,
+          vision: parsed.data.vision,
+          teamIntro: parsed.data.teamIntro ?? "",
+          expertise: parsed.data.expertise,
+          coreValues: parsed.data.coreValues,
+        },
+      })
+    : await prisma.about.create({
+        data: {
+          mission: parsed.data.mission,
+          vision: parsed.data.vision,
+          teamIntro: parsed.data.teamIntro ?? "",
+          expertise: parsed.data.expertise,
+          coreValues: parsed.data.coreValues,
+        },
+      });
+
+  res.json({ about });
+});
+
 export default router;
