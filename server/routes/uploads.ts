@@ -11,15 +11,18 @@ type UploadFile = {
   buffer?: Buffer;
 };
 
+const IMAGE_MIMES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+const DOCUMENT_MIMES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+
 const upload = multer({
   storage: multer.memoryStorage(), // ensure file.buffer is available
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (_req: Request, file: UploadFile, cb: (error: Error | null, acceptFile: boolean) => void) => {
-    const allowedMimes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    const allowedMimes = [...IMAGE_MIMES, ...DOCUMENT_MIMES];
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Invalid file type. Only images are allowed."), false);
+      cb(new Error("Invalid file type. Allowed: images (jpeg/png/webp/gif) or documents (pdf/doc/docx)."), false);
     }
   },
 });
