@@ -3,13 +3,13 @@ import nodemailer from "nodemailer";
 import { z } from "zod";
 
 const contactSchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-  email: z.string().email(),
-  phone: z.string().optional(),
-  company: z.string().optional(),
-  service: z.string().optional(),
-  message: z.string().min(10),
+  firstName: z.string().trim().min(1, "First name is required"),
+  lastName: z.string().trim().min(1, "Last name is required"),
+  email: z.string().trim().email("Valid email is required"),
+  phone: z.string().trim().optional(),
+  company: z.string().trim().optional(),
+  service: z.string().trim().optional(),
+  message: z.string().trim().min(1, "Message is required"),
 });
 
 export async function POST(req: NextRequest) {
@@ -17,8 +17,10 @@ export async function POST(req: NextRequest) {
   const parsed = contactSchema.safeParse(body);
 
   if (!parsed.success) {
+    const firstIssue = parsed.error.issues?.[0];
+    const friendly = firstIssue?.message || "Invalid form data";
     return NextResponse.json(
-      { error: "Invalid form data", issues: parsed.error.issues },
+      { error: friendly, issues: parsed.error.issues },
       { status: 400 }
     );
   }

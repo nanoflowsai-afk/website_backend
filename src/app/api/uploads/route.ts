@@ -5,8 +5,8 @@ import crypto from "crypto";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
-// Allowed image MIME types
-const ALLOWED_MIMES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+const IMAGE_MIMES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+const DOCUMENT_MIMES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 // Ensure uploads directory exists
@@ -26,9 +26,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File is required" }, { status: 400 });
     }
 
+    const allowedMimes = [...IMAGE_MIMES, ...DOCUMENT_MIMES];
     // Validate file type
-    if (!ALLOWED_MIMES.includes(file.type)) {
-      return NextResponse.json({ error: "Invalid file type. Only images are allowed." }, { status: 400 });
+    if (!allowedMimes.includes(file.type)) {
+      return NextResponse.json({ error: "Invalid file type. Allowed: images (jpeg/png/webp/gif) or documents (pdf/doc/docx)." }, { status: 400 });
     }
 
     // Validate file size
