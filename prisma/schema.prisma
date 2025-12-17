@@ -56,8 +56,8 @@ model BlogPost {
   id          Int      @id @default(autoincrement())
   title       String
   slug        String   @unique
-  excerpt     String
-  content     String
+  excerpt     String   @db.Text
+  content     String   @db.Text
   imageUrl    String   @db.Text
   isPublished Boolean  @default(false)
   publishedAt DateTime?
