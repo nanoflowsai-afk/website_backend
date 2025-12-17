@@ -19,26 +19,15 @@ const app = express();
 
 app.use(morgan("dev"));
 
-// CORS: explicitly allow the deployed frontend and localhost dev to call this API
-const allowedOrigins = [
-  process.env.FRONTEND_ORIGIN || "",
-  "http://localhost:5000",
-  "http://localhost:3000",
-  "https://website-frontend-ruddy.vercel.app",
-];
-
+// CORS: allow any origin (frontend is public) while sending credentials.
+// This mirrors the earlier permissive config but also handles preflight.
 app.use(
   cors({
-    origin(origin, callback) {
-      if (!origin) return callback(null, true); // server-to-server or curl
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error(`Not allowed by CORS: ${origin}`));
-    },
+    origin: true,
     credentials: true,
   }),
 );
-// Handle preflight for all routes
-app.options("*", cors({ origin: allowedOrigins, credentials: true }));
+app.options("*", cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 
