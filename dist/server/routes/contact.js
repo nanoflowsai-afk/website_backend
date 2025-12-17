@@ -3,19 +3,21 @@ import nodemailer from "nodemailer";
 import { z } from "zod";
 const router = Router();
 const contactSchema = z.object({
-    firstName: z.string().min(1),
-    lastName: z.string().min(1),
-    email: z.string().email(),
-    phone: z.string().optional(),
-    company: z.string().optional(),
-    service: z.string().optional(),
-    message: z.string().min(10),
+    firstName: z.string().trim().min(1, "First name is required"),
+    lastName: z.string().trim().min(1, "Last name is required"),
+    email: z.string().trim().email("Valid email is required"),
+    phone: z.string().trim().optional(),
+    company: z.string().trim().optional(),
+    service: z.string().trim().optional(),
+    message: z.string().trim().min(1, "Message is required"),
 });
 router.post("/", async (req, res) => {
+    var _a;
     const body = req.body;
     const parsed = contactSchema.safeParse(body);
     if (!parsed.success) {
-        return res.status(400).json({ error: "Invalid form data", issues: parsed.error.issues });
+        const firstIssue = (_a = parsed.error.issues) === null || _a === void 0 ? void 0 : _a[0];
+        return res.status(400).json({ error: (firstIssue === null || firstIssue === void 0 ? void 0 : firstIssue.message) || "Invalid form data", issues: parsed.error.issues });
     }
     const { firstName, lastName, email, phone, company, service, message } = parsed.data;
     const smtpHost = process.env.SMTP_HOST;
