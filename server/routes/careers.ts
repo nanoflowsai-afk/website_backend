@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { JobPosting } from "@prisma/client";
 import { prisma } from "../../src/lib/prisma.js";
 
 const router = Router();
@@ -24,7 +25,7 @@ router.get("/", async (_req, res) => {
       orderBy: { displayOrder: "asc" },
     });
 
-    const parsedJobs = jobs.map((job) => ({
+    const parsedJobs = jobs.map((job: JobPosting) => ({
       ...job,
       requirements: parseJsonField(job.requirements),
     }));

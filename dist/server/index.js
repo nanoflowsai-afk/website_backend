@@ -15,7 +15,13 @@ import careersRouter from "./routes/careers.js";
 import applyRouter from "./routes/apply.js";
 const app = express();
 app.use(morgan("dev"));
-app.use(cors({ origin: true, credentials: true }));
+// CORS: allow any origin (frontend is public) while sending credentials.
+// This mirrors the earlier permissive config but also handles preflight.
+app.use(cors({
+    origin: true,
+    credentials: true,
+}));
+app.options("*", cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 app.get("/health", (_req, res) => res.json({ ok: true }));
