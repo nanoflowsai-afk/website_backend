@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { HeroSlide, TeamMember } from "@prisma/client";
 import { prisma } from "../../src/lib/prisma.js";
 
 const router = Router();
@@ -36,22 +37,22 @@ router.get("/", async (_req, res) => {
       }),
     ]);
 
-    const parsedSlides = slides.map((s) => ({
+    const parsedSlides = slides.map((s: HeroSlide) => ({
       ...s,
       tags: parseJsonField(s.tags),
     }));
 
-    const parsedTeam = team.map((m) => ({
+    const parsedTeam = team.map((m: TeamMember) => ({
       ...m,
       expertise: parseJsonField(m.expertise),
     }));
 
     const parsedAbout = about
       ? {
-          ...about,
-          expertise: parseJsonField(about.expertise),
-          coreValues: parseJsonField(about.coreValues),
-        }
+        ...about,
+        expertise: parseJsonField(about.expertise),
+        coreValues: parseJsonField(about.coreValues),
+      }
       : null;
 
     res.json({ slides: parsedSlides, about: parsedAbout, team: parsedTeam, posts });
