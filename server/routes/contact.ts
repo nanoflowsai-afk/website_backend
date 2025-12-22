@@ -37,6 +37,13 @@ router.post("/", async (req, res) => {
     return res.status(500).json({ error: "Email service not configured" });
   }
 
+  console.log("SMTP Config:", {
+    host: smtpHost,
+    port: smtpPort,
+    user: smtpUser ? `${smtpUser.substring(0, 3)}***` : "undefined",
+    secure: smtpPort === 465
+  });
+
   const transporter = nodemailer.createTransport({
     host: smtpHost,
     port: smtpPort,
@@ -45,6 +52,9 @@ router.post("/", async (req, res) => {
       user: smtpUser,
       pass: smtpPass,
     },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,   // 10 seconds
+    socketTimeout: 10000,     // 10 seconds
   });
 
   const htmlContent = `

@@ -8,16 +8,15 @@ export const API_BASE_URL = rawApiBase;
  * frontend and backend are deployed together.
  */
 export function apiUrl(path: string) {
-  if (/^https?:\/\//i.test(path)) return path;
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE_URL}${normalizedPath}`;
+    if (/^https?:\/\//i.test(path)) return path;
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    return `${API_BASE_URL}${normalizedPath}`;
 }
 
 /**
  * Thin wrapper around fetch that prefixes the API base URL when needed.
  */
 export function apiFetch(input: string, init?: RequestInit) {
-  const url = apiUrl(input);
-  return fetch(url, init);
+    const url = apiUrl(input);
+    return fetch(url, init);
 }
-
