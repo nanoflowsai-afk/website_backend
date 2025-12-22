@@ -1,9 +1,8 @@
 import { Router } from "express";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import multer from "multer";
 import fetch from "node-fetch";
 import path from "path";
-import fs from "fs/promises";
 
 const upload = multer();
 const router = Router();
@@ -13,29 +12,58 @@ router.post("/", upload.single("resume"), async (req, res) => {
     const { name, email, phone, linkedin, message, positionTitle, positionDepartment, resumeUrl } = req.body;
     if (!name || !email || !message || !positionTitle) return res.status(400).json({ error: "Missing required fields" });
 
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    const recipientEmail = process.env.CAREERS_EMAIL || smtpUser;
+    // Resend Configuration
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY is missing");
+      return res.status(500).json({ error: "Email service not configured" });
+    }
 
-    if (!smtpUser || !smtpPass) return res.status(500).json({ error: "Email service not configured" });
-
-    const transporter = nodemailer.createTransport({ service: "gmail", auth: { user: smtpUser, pass: smtpPass } });
-    try { await transporter.verify(); } catch (e) { console.error(e); return res.status(500).json({ error: "SMTP verification failed" }); }
+    const resend = new Resend(resendApiKey);
+    const fromEmail = process.env.RESEND_FROM || "onboarding@resend.dev";
+    const recipientEmail = process.env.CAREERS_EMAIL || "nanoflowsvizag@gmail.com";
 
     let attachments: any[] = [];
     if (req.file && req.file.buffer) {
-      attachments.push({ filename: req.file.originalname || "resume", content: req.file.buffer });
+      attachments.push({ filename: req.file.originalname || "resume.pdf", content: req.file.buffer });
     } else if (resumeUrl) {
       try {
         const r = await fetch(resumeUrl as string);
-        if (r.ok) { const buffer = Buffer.from(await r.arrayBuffer()); attachments.push({ filename: path.basename(resumeUrl as string), content: buffer }); }
+        if (r.ok) {
+          const buffer = Buffer.from(await r.arrayBuffer());
+          attachments.push({ filename: path.basename(resumeUrl as string), content: buffer });
+        }
       } catch (e) { console.warn("Could not fetch resume url", e); }
     }
 
-    const emailHtml = `<p>Application for ${positionTitle}</p><p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`;
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>New Application for ${positionTitle}</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone || "N/A"}</p>
+        <p><strong>LinkedIn:</strong> ${linkedin || "N/A"}</p>
+        <p><strong>Department:</strong> ${positionDepartment}</p>
+        <h3>Message:</h3>
+        <p>${message}</p>
+      </div>
+    `;
 
-    await transporter.sendMail({ from: smtpUser, to: recipientEmail, subject: `New Application: ${positionTitle} - ${name}`, html: emailHtml, attachments });
-    res.json({ success: true, message: "Application submitted successfully" });
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: recipientEmail,
+      subject: `New Application: ${positionTitle} - ${name}`,
+      html: htmlContent,
+      attachments,
+      replyTo: email,
+    });
+
+    if (error) {
+      console.error("Resend API error:", error);
+      return res.status(500).json({ error: "Failed to submit application" });
+    }
+
+    res.json({ success: true, message: "Application submitted successfully", id: data?.id });
   } catch (err) {
     console.error("Apply API error:", err);
     res.status(500).json({ error: "Failed to submit application" });

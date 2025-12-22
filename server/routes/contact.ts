@@ -1,5 +1,5 @@
 import { Router } from "express";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { z } from "zod";
 
 const router = Router();
@@ -25,37 +25,20 @@ router.post("/", async (req, res) => {
 
   const { firstName, lastName, email, phone, company, service, message } = parsed.data;
 
-  const smtpHost = process.env.SMTP_HOST;
-  const smtpPort = parseInt(process.env.SMTP_PORT || "587", 10);
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-  const smtpFrom = process.env.SMTP_FROM || smtpUser;
-  const contactEmail = process.env.CONTACT_EMAIL || "nanoflowsvizag@gmail.com";
-
-  if (!smtpHost || !smtpUser || !smtpPass) {
-    console.error("SMTP configuration missing");
+  // Resend Configuration
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (!resendApiKey) {
+    console.error("RESEND_API_KEY is missing");
     return res.status(500).json({ error: "Email service not configured" });
   }
 
-  console.log("SMTP Config:", {
-    host: smtpHost,
-    port: smtpPort,
-    user: smtpUser ? `${smtpUser.substring(0, 3)}***` : "undefined",
-    secure: smtpPort === 465
-  });
+  const resend = new Resend(resendApiKey);
 
-  const transporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpPort === 465,
-    auth: {
-      user: smtpUser,
-      pass: smtpPass,
-    },
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,   // 10 seconds
-    socketTimeout: 10000,     // 10 seconds
-  });
+  // Use the verified sender or the default testing sender
+  // If the user has a verified domain, they should update 'from'
+  // For testing/free tier, 'onboarding@resend.dev' works to the registered email.
+  const fromEmail = process.env.RESEND_FROM || "onboarding@resend.dev";
+  const toEmail = process.env.CONTACT_EMAIL || "nanoflowsvizag@gmail.com";
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -101,18 +84,23 @@ router.post("/", async (req, res) => {
   `;
 
   try {
-    await transporter.sendMail({
-      from: smtpFrom,
-      to: contactEmail,
-      replyTo: email,
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: toEmail,
       subject: `New Contact Form Submission from ${firstName} ${lastName}`,
       html: htmlContent,
+      replyTo: email,
     });
 
-    return res.json({ success: true });
+    if (error) {
+      console.error("Resend API error:", error);
+      return res.status(500).json({ error: "Failed to send email" });
+    }
+
+    return res.json({ success: true, id: data?.id });
   } catch (error) {
     console.error("Email sending failed:", error);
-    return res.status(500).json({ error: "Failed to send email. Please try again later." });
+    return res.status(500).json({ error: "Failed to send email" });
   }
 });
 
