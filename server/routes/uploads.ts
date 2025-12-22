@@ -6,11 +6,7 @@ import fs from "fs/promises";
 import crypto from "crypto";
 import { v2 as cloudinary } from "cloudinary";
 
-type UploadFile = {
-  mimetype: string;
-  originalname?: string;
-  buffer?: Buffer;
-};
+
 
 const IMAGE_MIMES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
 const DOCUMENT_MIMES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
@@ -25,12 +21,12 @@ cloudinary.config({
 const upload = multer({
   storage: multer.memoryStorage(), // ensure file.buffer is available
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  fileFilter: (_req: Request, file: UploadFile, cb: (error: Error | null, acceptFile: boolean) => void) => {
+  fileFilter: (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     const allowedMimes = [...IMAGE_MIMES, ...DOCUMENT_MIMES];
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Invalid file type. Allowed: images (jpeg/png/webp/gif) or documents (pdf/doc/docx)."), false);
+      cb(new Error("Invalid file type. Allowed: images (jpeg/png/webp/gif) or documents (pdf/doc/docx)."));
     }
   },
 });

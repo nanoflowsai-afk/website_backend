@@ -21,7 +21,7 @@ const upload = multer({
             cb(null, true);
         }
         else {
-            cb(new Error("Invalid file type. Allowed: images (jpeg/png/webp/gif) or documents (pdf/doc/docx)."), false);
+            cb(new Error("Invalid file type. Allowed: images (jpeg/png/webp/gif) or documents (pdf/doc/docx)."));
         }
     },
 });
