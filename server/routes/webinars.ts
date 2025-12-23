@@ -6,7 +6,7 @@ const router = Router();
 // Get all webinars
 router.get("/", async (req, res) => {
     try {
-        const webinars = await (prisma as any).webinar.findMany({
+        const webinars = await prisma.webinar.findMany({
             orderBy: { createdAt: "desc" },
             include: { roadmapItems: true }
         });
@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const webinar = await (prisma as any).webinar.findUnique({
+        const webinar = await prisma.webinar.findUnique({
             where: { id: parseInt(id) },
             include: { roadmapItems: { orderBy: { day: 'asc' } } }
         });
@@ -57,7 +57,7 @@ router.post("/", async (req, res) => {
             } : undefined
         };
 
-        const newWebinar = await (prisma as any).webinar.create({
+        const newWebinar = await prisma.webinar.create({
             data: createData,
             include: { roadmapItems: true }
         });
@@ -94,7 +94,7 @@ router.put("/:id", async (req, res) => {
             };
         }
 
-        const updatedWebinar = await (prisma as any).webinar.update({
+        const updatedWebinar = await prisma.webinar.update({
             where: { id: parseInt(id) },
             data: updateData,
             include: { roadmapItems: { orderBy: { day: 'asc' } } }
@@ -111,7 +111,7 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        await (prisma as any).webinar.delete({
+        await prisma.webinar.delete({
             where: { id: parseInt(id) }
         });
         res.json({ message: "Webinar deleted successfully" });
