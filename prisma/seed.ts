@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   const hashedPassword = await bcrypt.hash("admin123", 10);
-  
+
   await prisma.admin.upsert({
     where: { email: "admin@nanoflows.com" },
     update: {},
@@ -165,6 +165,93 @@ async function main() {
         requirements: ["5+ years architecture experience", "Enterprise AI deployment", "Strong communication skills", "Leadership experience"],
         isActive: true,
         displayOrder: 4,
+      },
+    ],
+  });
+
+  await (prisma as any).webinar.deleteMany();
+  await (prisma as any).webinar.createMany({
+    data: [
+      {
+        title: "Automate Your Business with AI Agents",
+        description: "Learn how AI agents can automate workflows, customer support, and decision-making.",
+        date: "Dec 28, 2025",
+        time: "2:00 PM IST",
+        duration: "90 Minutes",
+        speaker: "Rajesh Kumar",
+        level: "Beginner",
+        category: "AI Agents",
+        type: "Upcoming",
+        imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=300&fit=crop",
+        registeredCount: 234,
+        maxCapacity: 500,
+      },
+      {
+        title: "Marketing Automation with AI",
+        description: "Transform your marketing with intelligent automation and personalization strategies.",
+        date: "Dec 25, 2025",
+        time: "3:30 PM IST",
+        duration: "60 Minutes",
+        speaker: "Priya Singh",
+        level: "Intermediate",
+        category: "Marketing AI",
+        type: "Live",
+        imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=300&fit=crop",
+        registeredCount: 512,
+        maxCapacity: 1000,
+        isLandingPage: true,
+      },
+      {
+        title: "Building Intelligent Search Systems",
+        description: "Enterprise AI search solutions for better data discovery and insights.",
+        date: "Dec 20, 2025",
+        time: "1:00 PM IST",
+        duration: "75 Minutes",
+        speaker: "Amit Patel",
+        level: "Advanced",
+        category: "AI Automation",
+        type: "Recorded",
+        imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=300&fit=crop",
+      },
+      {
+        title: "AI for Business Growth",
+        description: "Practical strategies to scale your business using AI-driven automation.",
+        date: "Dec 30, 2025",
+        time: "4:00 PM IST",
+        duration: "90 Minutes",
+        speaker: "Sarah Johnson",
+        level: "Beginner",
+        category: "Business AI",
+        type: "Upcoming",
+        imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=300&fit=crop",
+        registeredCount: 156,
+        maxCapacity: 500,
+      },
+      {
+        title: "Workshop: Custom LLM Development",
+        description: "Hands-on workshop on building custom language models for your use cases.",
+        date: "Dec 15, 2025",
+        time: "10:00 AM IST",
+        duration: "120 Minutes",
+        speaker: "Dr. Neha Gupta",
+        level: "Advanced",
+        category: "Workshops",
+        type: "Recorded",
+        imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=300&fit=crop",
+      },
+      {
+        title: "AI Agents in Customer Support",
+        description: "Deploy AI agents to handle customer inquiries and support tickets automatically.",
+        date: "Jan 5, 2026",
+        time: "2:30 PM IST",
+        duration: "60 Minutes",
+        speaker: "Marcus Chen",
+        level: "Intermediate",
+        category: "AI Agents",
+        type: "Upcoming",
+        imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=300&fit=crop",
+        registeredCount: 89,
+        maxCapacity: 500,
       },
     ],
   });

@@ -88,3 +88,48 @@ model JobPosting {
   updatedAt    DateTime @updatedAt
 }
 
+model Webinar {
+  id              Int      @id @default(autoincrement())
+  title           String
+  description     String   @db.Text
+  date            String
+  time            String
+  duration        String
+  speaker         String
+  level           String
+  category        String
+  type            String
+  imageUrl        String   @db.Text
+  registeredCount Int      @default(0)
+  maxCapacity     Int      @default(100)
+  isLandingPage   Boolean  @default(false)
+  roadmapItems    WebinarRoadmapItem[]
+  notificationActive Boolean  @default(false)
+  notificationText   String?  @db.Text
+  heroTitle          String?  @db.Text
+  heroSubtitle       String?  @db.Text
+  heroContext        String?  @db.Text
+  heroImage          String?  @db.Text
+  platform           String?  // e.g., "Zoom"
+  mentorName         String?
+  mentorRole         String?
+  mentorImage        String?  @db.Text
+  mentorBio          String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model WebinarRoadmapItem {
+  id          Int      @id @default(autoincrement())
+  webinarId   Int
+  webinar     Webinar  @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  day         Int
+  title       String
+  subtitle    String?
+  highlight   String?
+  description Json     // Stored as a JSON array of strings
+  imageUrl    String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+

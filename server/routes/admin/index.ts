@@ -8,6 +8,7 @@ import aboutRouter from "./about.js";
 import teamRouter from "./team-members.js";
 import blogRouter from "./blog-posts.js";
 import careersRouter from "./careers.js";
+import webinarsRouter from "./webinars.js";
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use("/about", aboutRouter);
 router.use("/team-members", teamRouter);
 router.use("/blog-posts", blogRouter);
 router.use("/careers", careersRouter);
+router.use("/webinars", webinarsRouter);
 
 export default router;
