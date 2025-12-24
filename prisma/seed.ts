@@ -123,8 +123,8 @@ async function main() {
     ],
   });
 
-  await prisma.jobPosting.deleteMany();
-  await prisma.jobPosting.createMany({
+  await (prisma as any).jobPosting.deleteMany();
+  await (prisma as any).jobPosting.createMany({
     data: [
       {
         title: "AI/ML Engineer",
@@ -255,6 +255,45 @@ async function main() {
       },
     ],
   });
+
+
+  // Create User
+  const userPassword = await bcrypt.hash("password123", 10);
+  const user = await prisma.user.upsert({
+    where: { email: "user@example.com" },
+    update: {
+      headline: "Senior Software Engineer",
+      bio: "Passionate about building scalable web applications. Enjoys hiking and photography.",
+      avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1"
+    },
+    create: {
+      name: "Demo User",
+      email: "user@example.com",
+      password: userPassword,
+      headline: "Senior Software Engineer",
+      bio: "Passionate about building scalable web applications. Enjoys hiking and photography.",
+      avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1"
+    },
+  });
+
+  // Register user for some webinars
+  const allWebinars = await prisma.webinar.findMany({ take: 3 });
+  for (const webinar of allWebinars) {
+    // Check if registration exists to avoid unique constraint error on re-seed
+    const exists = await prisma.webinarRegistration.findUnique({
+      where: { userId_webinarId: { userId: user.id, webinarId: webinar.id } }
+    });
+
+    if (!exists) {
+      await prisma.webinarRegistration.create({
+        data: {
+          userId: user.id,
+          webinarId: webinar.id,
+          status: 'confirmed'
+        }
+      });
+    }
+  }
 
   console.log("Database seeded successfully!");
   console.log("Admin credentials: admin@nanoflows.com / admin123");
