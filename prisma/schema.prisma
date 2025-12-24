@@ -65,14 +65,7 @@ model BlogPost {
   updatedAt   DateTime @updatedAt
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+
 
 model JobPosting {
   id           Int      @id @default(autoincrement())
@@ -86,6 +79,19 @@ model JobPosting {
   displayOrder Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  headline  String?
+  bio       String?  @db.Text
+  avatarUrl String?  @db.Text
+  registrations WebinarRegistration[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Webinar {
@@ -104,6 +110,7 @@ model Webinar {
   maxCapacity     Int      @default(100)
   isLandingPage   Boolean  @default(false)
   roadmapItems    WebinarRoadmapItem[]
+  registrations   WebinarRegistration[]
   notificationActive Boolean  @default(false)
   notificationText   String?  @db.Text
   heroTitle          String?  @db.Text
@@ -117,6 +124,18 @@ model Webinar {
   mentorBio          String?  @db.Text
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model WebinarRegistration {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  webinarId    Int
+  webinar      Webinar  @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  registeredAt DateTime @default(now())
+  status       String   @default("confirmed") // confirmed, cancelled, attended
+
+  @@unique([userId, webinarId])
 }
 
 model WebinarRoadmapItem {

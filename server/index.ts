@@ -15,6 +15,7 @@ import uploadsRouter from "./routes/uploads.js";
 import careersRouter from "./routes/careers.js";
 import applyRouter from "./routes/apply.js";
 import webinarsRouter from "./routes/webinars.js";
+import userRouter from "./routes/user.js";
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use("/api/uploads", uploadsRouter);
 app.use("/api/careers", careersRouter);
 app.use("/api/apply", applyRouter);
 app.use("/api/webinars", webinarsRouter);
+app.use("/api/user", userRouter);
 
 // Serve uploaded files from /uploads/*
 app.use(

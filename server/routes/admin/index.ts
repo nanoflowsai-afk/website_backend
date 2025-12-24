@@ -9,6 +9,7 @@ import teamRouter from "./team-members.js";
 import blogRouter from "./blog-posts.js";
 import careersRouter from "./careers.js";
 import webinarsRouter from "./webinars.js";
+import registrationsRouter from "./registrations.js";
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use("/team-members", teamRouter);
 router.use("/blog-posts", blogRouter);
 router.use("/careers", careersRouter);
 router.use("/webinars", webinarsRouter);
+router.use("/registrations", registrationsRouter);
 
 export default router;
