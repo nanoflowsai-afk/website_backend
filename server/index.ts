@@ -16,6 +16,7 @@ import careersRouter from "./routes/careers.js";
 import applyRouter from "./routes/apply.js";
 import webinarsRouter from "./routes/webinars.js";
 import userRouter from "./routes/user.js";
+import aiToolsRouter from "./routes/ai-tools.js";
 
 const app = express();
 
@@ -51,6 +52,11 @@ app.use("/api/careers", careersRouter);
 app.use("/api/apply", applyRouter);
 app.use("/api/webinars", webinarsRouter);
 app.use("/api/user", userRouter);
+import { productRequestsRouter } from "./routes/product-requests";
+
+// ... previous routes
+app.use("/api/ai-tools", aiToolsRouter);
+app.use("/api/product-requests", productRequestsRouter);
 
 // Serve uploaded files from /uploads/*
 app.use(
