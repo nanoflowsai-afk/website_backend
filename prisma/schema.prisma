@@ -152,3 +152,27 @@ model WebinarRoadmapItem {
   updatedAt   DateTime @updatedAt
 }
 
+model AiTool {
+  id           Int      @id @default(autoincrement())
+  name         String
+  description  String   @db.Text
+  category     String
+  pricing      String   // Free, Freemium, Paid
+  websiteUrl   String   @db.Text
+  imageUrl     String   @db.Text
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ProductRequest {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  idea      String   @db.Text
+  status    String   @default("Pending") // Pending, Reviewed, Completed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

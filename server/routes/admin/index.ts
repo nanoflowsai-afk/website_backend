@@ -10,6 +10,7 @@ import blogRouter from "./blog-posts.js";
 import careersRouter from "./careers.js";
 import webinarsRouter from "./webinars.js";
 import registrationsRouter from "./registrations.js";
+import aiToolsRouter from "./ai-tools.js";
 
 const router = Router();
 
@@ -23,5 +24,10 @@ router.use("/blog-posts", blogRouter);
 router.use("/careers", careersRouter);
 router.use("/webinars", webinarsRouter);
 router.use("/registrations", registrationsRouter);
+import { adminProductRequestsRouter } from "./product-requests";
+
+// ... previous routes
+router.use("/ai-tools", aiToolsRouter);
+router.use("/product-requests", adminProductRequestsRouter);
 
 export default router;
