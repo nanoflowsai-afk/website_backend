@@ -256,6 +256,74 @@ async function main() {
     ],
   });
 
+  // Create Gen AI Masterclass with 5-Day Roadmap (Custom create for nested writes)
+  await prisma.webinar.create({
+    data: {
+      title: "Gen AI Masterclass: From Concept to Creation",
+      description: "Join this intensive 5-day bootcamp to master Generative AI. From understanding the core concepts of LLMs to building and deploying your own custom AI agents, this course is designed for professionals who want to stay ahead of the curve. Simple, practical, and hands-on.",
+      date: "Jan 15, 2026",
+      time: "6:00 PM IST",
+      duration: "5 Days",
+      speaker: "Dr. Ananya Sharma",
+      mentorName: "Dr. Ananya Sharma",
+      mentorRole: "Principal AI Researcher",
+      mentorBio: "Dr. Sharma is a pioneer in Generative AI with over a decade of experience in NLP and deep learning. She has led AI research teams at top tech firms and is passionate about democratizing AI education.",
+      mentorImage: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face",
+      level: "All Levels",
+      category: "Generative AI",
+      type: "Upcoming",
+      imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500&h=300&fit=crop",
+      registeredCount: 420,
+      maxCapacity: 1000,
+      price: 4999,
+      currency: "INR",
+      roadmapItems: {
+        create: [
+          {
+            day: 1,
+            title: "The Revolution of Generative AI",
+            subtitle: "Understanding the New Era of Computing",
+            highlight: "Foundation",
+            description: ["Introduction to LLMs and Transformers", "How ChatGPT and Claude actually work", "The landscape of Generative AI tools", "Setting up your local AI environment"],
+            imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=500&h=300&fit=crop",
+          },
+          {
+            day: 2,
+            title: "Prompt Engineering & Context",
+            subtitle: "Mastering Communication with AI",
+            highlight: "Core Skills",
+            description: ["The art and science of Prompt Engineering", "Zero-shot, One-shot, and Few-shot prompting", "Understanding Context Windows and Tokens", "Hands-on: Building a Prompt Library"],
+            imageUrl: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=500&h=300&fit=crop",
+          },
+          {
+            day: 3,
+            title: "Building Custom AI Agents",
+            subtitle: "Creating Autonomous Systems",
+            highlight: "Development",
+            description: ["Introduction to AI Agents and Autonomous Loops", "Using Frameworks like LangChain and AutoGen", "Connecting LLMs to external tools (APIs, Search)", "Building your first Customer Support Agent"],
+            imageUrl: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=500&h=300&fit=crop",
+          },
+          {
+            day: 4,
+            title: "Fine-Tuning & RAG",
+            subtitle: "Training on Your Own Data",
+            highlight: "Advanced",
+            description: ["Retrieval Augmented Generation (RAG) explained", "Building a 'Chat with PDF' application", "When to Fine-tune vs. RAG", "Preparing datasets for Fine-tuning"],
+            imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
+          },
+          {
+            day: 5,
+            title: "Capstone: Deploying a Gen AI App",
+            subtitle: "Bringing Your Solution to Life",
+            highlight: "Deployment",
+            description: ["Designing a full-stack Gen AI application", "Frontend integration (React/Next.js)", "Backend API serving (FastAPI/Node.js)", "Deployment strategies and best practices"],
+            imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=300&fit=crop",
+          },
+        ],
+      },
+    },
+  });
+
 
   // Create User
   const userPassword = await bcrypt.hash("password123", 10);

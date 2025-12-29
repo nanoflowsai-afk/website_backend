@@ -53,4 +53,53 @@ router.get("/", async (req, res) => {
     }
 });
 
+// Update registration status
+router.put("/:id", async (req, res) => {
+    const adminId = requireAdmin(req);
+    if (!adminId) return res.status(401).json({ error: "Unauthorized" });
+
+    try {
+        const registrationId = parseInt(req.params.id);
+        const { status } = req.body; // 'accepted', 'rejected'
+
+        if (!['accepted', 'rejected', 'pending'].includes(status)) {
+            return res.status(400).json({ error: "Invalid status" });
+        }
+
+        const registration = await prisma.webinarRegistration.update({
+            where: { id: registrationId },
+            data: { status },
+            include: { webinar: true, user: true }
+        });
+
+        // Send Notification if accepted
+        if (status === 'accepted') {
+            await prisma.notification.create({
+                data: {
+                    userId: registration.userId,
+                    message: `Your registration for "${registration.webinar.title}" has been accepted!`,
+                    type: 'success',
+                    isRead: false
+                }
+            });
+            
+            // Optionally send email here as well (if email module is available)
+        } else if (status === 'rejected') {
+             await prisma.notification.create({
+                data: {
+                    userId: registration.userId,
+                    message: `Your registration for "${registration.webinar.title}" has been declined.`,
+                    type: 'error',
+                    isRead: false
+                }
+            });
+        }
+
+        res.json({ registration });
+    } catch (error) {
+        console.error("Failed to update registration:", error);
+        res.status(500).json({ error: "Failed to update registration" });
+    }
+});
+
 export default router;

@@ -28,6 +28,7 @@ app.use(
   cors({
     origin: true,
     credentials: true,
+    exposedHeaders: ["x-rtb-fingerprint-id"],
   }),
 );
 app.options("*", cors({ origin: true, credentials: true }));
@@ -56,7 +57,10 @@ import { productRequestsRouter } from "./routes/product-requests";
 
 // ... previous routes
 app.use("/api/ai-tools", aiToolsRouter);
+app.use("/api/ai-tools", aiToolsRouter);
 app.use("/api/product-requests", productRequestsRouter);
+import paymentsRouter from "./routes/payments.js";
+app.use("/api/payments", paymentsRouter);
 
 // Serve uploaded files from /uploads/*
 app.use(

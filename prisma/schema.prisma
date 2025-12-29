@@ -90,6 +90,7 @@ model User {
   bio       String?  @db.Text
   avatarUrl String?  @db.Text
   registrations WebinarRegistration[]
+  notifications Notification[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -122,6 +123,8 @@ model Webinar {
   mentorRole         String?
   mentorImage        String?  @db.Text
   mentorBio          String?  @db.Text
+  price              Float    @default(0)
+  currency           String   @default("INR")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -133,7 +136,12 @@ model WebinarRegistration {
   webinarId    Int
   webinar      Webinar  @relation(fields: [webinarId], references: [id], onDelete: Cascade)
   registeredAt DateTime @default(now())
-  status       String   @default("confirmed") // confirmed, cancelled, attended
+  status       String   @default("pending") // pending, accepted, rejected, attended
+  
+  // Payment Details
+  razorpayOrderId    String?  @unique
+  razorpayPaymentId  String?  @unique
+  paymentStatus      String   @default("NOT_REQUIRED") // PENDING, SUCCESS, FAILED, NOT_REQUIRED
 
   @@unique([userId, webinarId])
 }
@@ -176,3 +184,14 @@ model ProductRequest {
   updatedAt DateTime @updatedAt
 }
 
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String   @db.Text
+  type      String   @default("info") // info, success, warning, error
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

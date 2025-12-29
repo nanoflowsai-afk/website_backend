@@ -182,6 +182,53 @@ router.post("/registrations/:webinarId", checkAuth, async (req: any, res) => {
     }
 });
 
+// Get User Notifications
+router.get("/notifications", checkAuth, async (req: any, res) => {
+    try {
+        const notifications = await prisma.notification.findMany({
+            where: { userId: req.userId },
+            orderBy: { createdAt: 'desc' },
+            take: 20
+        });
+        res.json({ notifications });
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+// Mark Notification as Read
+router.put("/notifications/:id/read", checkAuth, async (req: any, res) => {
+    try {
+        const notificationId = parseInt(req.params.id);
+        await prisma.notification.updateMany({
+            where: {
+                id: notificationId,
+                userId: req.userId
+            },
+            data: { isRead: true }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Error updating notification:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+// Mark All Notifications as Read
+router.put("/notifications/read-all", checkAuth, async (req: any, res) => {
+    try {
+        await prisma.notification.updateMany({
+            where: { userId: req.userId, isRead: false },
+            data: { isRead: true }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Error marking all notifications as read:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
 // Delete User Account
 router.delete("/", checkAuth, async (req: any, res) => {
     try {
