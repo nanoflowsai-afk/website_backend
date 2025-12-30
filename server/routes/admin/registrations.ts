@@ -82,10 +82,40 @@ router.put("/:id", async (req, res) => {
                     isRead: false
                 }
             });
-            
+
+            // Trigger Webhook for Approval
+            try {
+                // Using global fetch (Node 18+)
+                await fetch("https://qwertdfdf.app.n8n.cloud/webhook-test/approve-payment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        registrationId: registration.id,
+                        user: {
+                            id: registration.user.id,
+                            name: registration.user.name,
+                            email: registration.user.email,
+                            headline: registration.user.headline
+                        },
+                        webinar: {
+                            id: registration.webinar.id,
+                            title: registration.webinar.title,
+                            date: registration.webinar.date,
+                            time: registration.webinar.time
+                        },
+                        status: registration.status,
+                        paymentStatus: registration.paymentStatus,
+                        registeredAt: registration.registeredAt
+                    })
+                });
+            } catch (webhookError) {
+                console.error("Approval webhook failed", webhookError);
+                // Non-blocking
+            }
+
             // Optionally send email here as well (if email module is available)
         } else if (status === 'rejected') {
-             await prisma.notification.create({
+            await prisma.notification.create({
                 data: {
                     userId: registration.userId,
                     message: `Your registration for "${registration.webinar.title}" has been declined.`,
