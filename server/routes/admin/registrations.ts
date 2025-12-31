@@ -86,7 +86,7 @@ router.put("/:id", async (req, res) => {
             // Trigger Webhook for Approval
             try {
                 // Using global fetch (Node 18+)
-                await fetch("https://qwertdfdf.app.n8n.cloud/webhook-test/approve-payment", {
+                await fetch("https://n8n.srv1058786.hstgr.cloud/webhook/approve-payment", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
