@@ -125,6 +125,9 @@ model Webinar {
   mentorBio          String?  @db.Text
   price              Float    @default(0)
   currency           String   @default("INR")
+  meetingId          String?  // Optional Meeting ID
+  passcode           String?  // Optional Passcode
+  inviteLink         String?  // Optional Invite Link
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
